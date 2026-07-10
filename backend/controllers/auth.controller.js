@@ -61,7 +61,7 @@ const verifyOtp = async (req, res) => {
 
       const now = new Date();
 
-      if (!user.emailOtp ||. String(user.emailOtp) !== String(otp) || now > new Date(user.emailOtpExpiry)
+      if (!user.emailOtp || String(user.emailOtp) !== String(otp) || now > new Date(user.emailOtpExpiry)
       ) {
         return responce(res, 400, "Invalid or expired OTP");
       }
@@ -88,6 +88,9 @@ const verifyOtp = async (req, res) => {
       user.isVerified = true;
       await user.save();
     }
-  } catch (error) {}
+  } catch (error) {
+    console.error("Error verifying OTP:", error);
+    throw new Error("Internal Server Error");
+  }
 };
 
