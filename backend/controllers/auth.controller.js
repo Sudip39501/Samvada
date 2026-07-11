@@ -22,6 +22,10 @@ const sendOtp = async (req, res) => {
       }
       user.emailOtp = otp;
       user.emailOtpExpiry = expiry;
+      console.log(otp);
+      console.log(expiry);
+
+      console.log(user);
       await user.save();
       await sendOtpToEmail(email, otp);
       return responce(res, 200, "Otp sent to your email", email);
@@ -61,7 +65,10 @@ const verifyOtp = async (req, res) => {
 
       const now = new Date();
 
-      if (!user.emailOtp || String(user.emailOtp) !== String(otp) || now > new Date(user.emailOtpExpiry)
+      if (
+        !user.emailOtp ||
+        String(user.emailOtp) !== String(otp) ||
+        now > new Date(user.emailOtpExpiry)
       ) {
         return responce(res, 400, "Invalid or expired OTP");
       }
@@ -88,9 +95,24 @@ const verifyOtp = async (req, res) => {
       user.isVerified = true;
       await user.save();
     }
+
+    const token = generateToken(user._id);
+
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 1000 * 60 * 60 * 24 * 365,
+    });
+    return responce(res, 200, "OTP verified successfully", { user, token });
   } catch (error) {
     console.error("Error verifying OTP:", error);
     throw new Error("Internal Server Error");
   }
+};
+
+
+module.exports = {
+  sendOtp,
+  verifyOtp,
 };
 

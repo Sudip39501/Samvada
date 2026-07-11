@@ -3,7 +3,7 @@ const nodemailer = require("nodemailer");
 // dotenv.config();
 
 const transporter = nodemailer.createTransport({
-  host: "gmail",
+  service: "gmail",
   // port: 587,
   // secure: false,
   auth: {
@@ -12,7 +12,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-transporter.verify(error, (success) => {
+transporter.verify((error, success) => {
   if (error) {
     console.log("Gmail connection failed");
   } else {

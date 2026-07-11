@@ -26,17 +26,18 @@ const userSchema = new mongoose.Schema(
         },
         message: "Please enter a valid email",
       },
+    },
       emailOtp: { type: String },
       emailOtpExp: { type: Date },
       profilePic: { type: String },
       about: { type: String },
-      lastseen: { type: date },
+      lastseen: { type: Date },
       isOnline: { type: Boolean, default: false },
       isVerified: { type: Boolean, default: false },
       agree: { type: Boolean, default: false },
-    },
+  
   },
-  { timeStamps: true },
+  { timestamps: true },
 );
 
 module.exports = mongoose.model("User", userSchema);
