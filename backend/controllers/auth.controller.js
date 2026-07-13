@@ -3,6 +3,7 @@ const User = require("../models/user.model");
 const responce = require("../utils/responceHandler");
 const sendOtpToEmail = require("../services/emailService");
 const twilloService = require("../services/twiloService");
+const generateToken = require("../utils/generateToken");
 
 //sent otp
 const sendOtp = async (req, res) => {
@@ -20,8 +21,9 @@ const sendOtp = async (req, res) => {
       if (!user) {
         user = new User({ email });
       }
+      
       user.emailOtp = otp;
-      user.emailOtpExpiry = expiry;
+      user.emailOtpExp = expiry;
       console.log(otp);
       console.log(expiry);
 
@@ -40,7 +42,7 @@ const sendOtp = async (req, res) => {
     if (!user) {
       user = new User({ phoneNumber, phoneSuffix });
     }
-    await twilloService.sendOtp(fullPhoneNumber);
+    await twilloService.sendOtpToPhoneNumber(fullPhoneNumber);
     await user.save();
 
     return responce(res, 200, "Otp sent to your phone", user);
@@ -65,17 +67,18 @@ const verifyOtp = async (req, res) => {
 
       const now = new Date();
 
+      
       if (
         !user.emailOtp ||
         String(user.emailOtp) !== String(otp) ||
-        now > new Date(user.emailOtpExpiry)
+        now > new Date(user.emailOtpExp)
       ) {
         return responce(res, 400, "Invalid or expired OTP");
       }
 
-      user.iszVerified = true;
+      user.isVerified = true;
       user.emailOtp = null;
-      user.emailOtpExpiry = null;
+      user.emailOtpExp = null;
       await user.save();
     } else {
       if (!phoneNumber && !phoneSuffix) {
