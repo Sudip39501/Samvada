@@ -10,5 +10,6 @@ router.post("/verify-otp",authController.verifyOtp);
 
 //protected route
 router.put("/update-profile",authMiddlware,multerMiddleware,authController.updateProfile);
+router.get("/logout",authController.logout);
 
 module.exports = router;
