@@ -54,5 +54,4 @@ const sendOtpToEmail = async (email, otp) => {
 };
 
 
-
 module.exports = sendOtpToEmail;

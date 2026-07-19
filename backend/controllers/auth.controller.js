@@ -4,6 +4,7 @@ const responce = require("../utils/responceHandler");
 const sendOtpToEmail = require("../services/emailService");
 const twilloService = require("../services/twiloService");
 const generateToken = require("../utils/generateToken");
+const { uploadFileToCloudinary } = require("../config/cloudinaryConfig");
 
 //sent otp
 const sendOtp = async (req, res) => {
@@ -108,14 +109,56 @@ const verifyOtp = async (req, res) => {
     });
     return responce(res, 200, "OTP verified successfully", { user, token });
   } catch (error) {
-    console.error("Error verifying OTP:", error);
+      console.error("Error verifying OTP:", error);
+      throw new Error("Internal Server Error");
+  }
+};
+
+
+const updateProfile = async (req, res) => {
+  const { username, agreed, about } = req.body;
+  const userId = req.user.userId;   //  take this id from middlware
+  try {
+    const user = await User.findById(userId);
+    const file = req.file;
+    if (file) {
+      const uploadResult = await uploadFileToCloudinary(file);
+      console.log(uploadResult);
+      user.profilePic = uploadResult?.secure_url;
+    } else if (req.body.profilePic) {
+      user.profilePic = req.body.profilePic;
+    }
+
+    if (username) user.username = username;
+    if (agreed) user.agree = agreed;
+    if (about != undefined) user.about = about;
+
+    // console.log(user);
+
+    await user.save();
+
+    responce(res, 200, "user profile updated successfully", user);
+  } catch (error) {
+    console.error("Error while updating user profile:", error);
     throw new Error("Internal Server Error");
   }
 };
 
 
+const logout =  async (req,res) =>{
+  try {
+    res.cookie("token" ,"" ,{expires:new Date(0)});
+    return responce(res,200, "user logout succesfully")
+    
+  } catch (error) {
+    console.log("Error occur while logout", error);
+    return responce(res,500, "Internal Server Error");
+  }
+}
 module.exports = {
   sendOtp,
   verifyOtp,
+  updateProfile,
+  logout,
 };
 
